@@ -1,9 +1,32 @@
 # Shifting from Abundance and Centrality - Fluctuating Microbes are Key Drivers of Long Lasting Microbiome Manipulation
 This code is attached to the paper "Shifting from Abundance and Centrality - Fluctuating Microbes are Key Drivers of Long Lasting Microbiome Manipulation". 
+For computing scores for fluctuating microbes, you can use our website, [micrOS](https://micros.math.biu.ac.il/).
+To search for the scores of a specific taxon in our database, visit [micrOS](https://micros.math.biu.ac.il/) and navigate to the [Predicted Next Gen Probiotic Taxa](https://micros.math.biu.ac.il/Pngt).
+The full probiotics table is also available in the **example** directory as **"probiotics.csv"**.
+
+## Python Dependencies (for computing microbial features)
+```python
+pandas
+numpy
+scipy
+re
+scikit-learn
+tqdm
+networkx
+```
+
+
 ## Computing microbial features
 By using the code in the **features_calculation** directory.
 - **calc_abundance_and_fluctuation_measures.py -** For computing the features of *log average abundance*, *log median abundance*, *standard deviation over time (S.D. time)*, and *standard deviation over population (S.D. people)* and *Fiedler vector*.
 - **calc_centrality_measures.py -** For building the predicted interaction network based on the predicting the differences of the log abundances of a certain taxon based on the log abundances in the previous time step. Then 4 centrality measures are computed to the interaction network: *in-degree*, *out-degree*, *betweenness centrality*, and *closeness centrality*.
+
+### Example use:
+There is an example dataset in the example directory ("tax8_log_sub PCA.csv" & "tag.csv"). 
+- By running the **calc_abundance_and_fluctuation_measures.py** script, one can produce a pandas dataframe containing the  *log average abundance*, *log median abundance*, *standard deviation over time (S.D. time)*, and *standard deviation over population (S.D. people)* and *Fiedler vector* features.
+- By running the **calc_centrality_measures.py** script, one can produce a pandas dataframe containing the  *in-degree*, *out-degree*, *betweenness centrality*, and *closeness centrality* features.
+
+**For others datasets, follow the format of the uploaded example data and update the file pathes as explained in the code documentation**
 
 ## Figures
 #### Fig_1
