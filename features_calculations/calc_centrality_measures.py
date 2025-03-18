@@ -13,7 +13,7 @@ def prepare_features_inter(otu):
     :return: Fixed otu and fixed tag
     """
     dict_dfs = dict()
-    for p,df in otu.groupby("person"):
+    for p, df in otu.groupby("person"):
         dict_dfs[p] = df
     list_df_of_tags = list()
     for person in dict_dfs.keys():
@@ -36,10 +36,10 @@ def prepare_features_inter(otu):
     otu = otu.loc[all_tags.index]
     del otu["time"]
     del otu["person"]
-    return all_tags,otu
+    return all_tags, otu
 
 
-def prepare_interaction_network_input_output(TAX,NAME,NO_LOG):
+def prepare_interaction_network_input_output(TAX, NAME, NO_LOG):
     """
     Prepare the input  and output for the Lasso prediction of differences in next time step
     :param TAX: taxonomy level to work at (int)
@@ -47,14 +47,20 @@ def prepare_interaction_network_input_output(TAX,NAME,NO_LOG):
     :param NO_LOG: Boollian whether we log-normalize the data
     :return:
     """
-    if TAX == 7 or TAX ==8:
+    if TAX == 7 or TAX == 8:
         if TAX == 7:
-            otu = pd.read_csv(f"{NAME}/tax{TAX}/tax7_log_subpca.csv",index_col=0)
+            otu = pd.read_csv(f"../{NAME}/tax{TAX}/tax7_log_subpca.csv", index_col=0)
         else:
-            otu = pd.read_csv(f"{NAME}/tax8/tax8_log_sub PCA.csv",index_col=0)
+            if NAME != "example":
+                otu = pd.read_csv(f"../{NAME}/tax8/tax8_log_sub PCA.csv", index_col=0)
+            else:
+                otu = pd.read_csv(f"../{NAME}/tax8_log_sub PCA.csv", index_col=0)
         if NO_LOG:
-            otu =10**(otu.astype(float))-0.1
-        tag = pd.read_csv(f"{NAME}/tax7/tag.csv",index_col=0)
+            otu = 10 ** (otu.astype(float)) - 0.1
+        if NAME != "example":
+            tag = pd.read_csv(f"../{NAME}/tax7/tag.csv", index_col=0)
+        else:
+            tag = pd.read_csv(f"../{NAME}/tag.csv", index_col=0)
         otu["person"] = [i.split("_")[0] for i in tag["Sample Name"]]
         otu["time"] = [i.split("_")[-1] for i in tag["Sample Name"]]
         # Create a dictionary to map the values - specific to PRJEB6456
@@ -62,12 +68,13 @@ def prepare_interaction_network_input_output(TAX,NAME,NO_LOG):
 
         # Replace the values in the "time" column
         otu['time'] = otu['time'].replace(mapping)
-        tag["name"] = [str(otu["person"].loc[i])+ "-" +str(otu["time"].loc[i]) for i in otu.index]
-        otu.index=tag["name"]
+        tag["name"] = [str(otu["person"].loc[i]) + "-" + str(otu["time"].loc[i]) for i in otu.index]
+        otu.index = tag["name"]
         tag_for_learn, otu_for_learn = prepare_features_inter(otu)
-        return otu_for_learn,tag_for_learn
+        return otu_for_learn, tag_for_learn
 
-def make_network_coef(otu_for_learn,tag_for_learn):
+
+def make_network_coef(otu_for_learn, tag_for_learn):
     """
     Predicting the difference of each taxon according to the log abundances of the previous time step
     :param otu_for_learn: Pandas dataframe with all the log abundances
@@ -83,6 +90,7 @@ def make_network_coef(otu_for_learn,tag_for_learn):
         clf.fit(x_train, y_train[bact])
         coef.loc[bact] = clf.coef_[:-1]
     return coef
+
 
 def calc_centrality_measures(coef):
     """
@@ -119,14 +127,13 @@ def calc_centrality_measures(coef):
     return all_centrality_measures
 
 
-
 if __name__ == "__main__":
-    # An example of building interaction network for the PRJEB6456 study
-    TAX =8
+    # An example of building interaction network for example study
+    TAX = 8
     NO_LOG = False
-    NAME = 'PRJEB6456'
-    otu_for_learn,tag_for_learn = prepare_interaction_network_input_output(TAX,NAME,NO_LOG)
-    lasso_coefs = make_network_coef(otu_for_learn,tag_for_learn)
+    # ADJUST DATASET NAME
+    NAME = 'example'
+    otu_for_learn, tag_for_learn = prepare_interaction_network_input_output(TAX, NAME, NO_LOG)
+    lasso_coefs = make_network_coef(otu_for_learn, tag_for_learn)
     centrality_features = calc_centrality_measures(lasso_coefs)
-
-
+    c = 0
